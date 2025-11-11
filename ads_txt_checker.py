@@ -184,11 +184,18 @@ def parse_ads_txt(raw_text: str) -> AdsTxtReport:
 
 def is_valid_authority_id(value: str) -> bool:
     """
-    Validate that the authority id, when present, resembles either a domain or an IP address.
+    Validate that the authority id, when present, resembles either a domain, an IP address,
+    or a TAG certification authority identifier (16 hexadecimal characters).
     """
     candidate = value.strip()
     if not candidate:
         return False
+
+    # Accept common TAG IDs (16 hex characters, case-insensitive)
+    tag_id = candidate.replace("-", "")
+    if len(tag_id) in (16, 32) and all(ch in "0123456789abcdefABCDEF" for ch in tag_id):
+        return True
+
     # Try IPv4 / IPv6
     try:
         ipaddress.ip_address(candidate)
